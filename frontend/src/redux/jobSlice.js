@@ -7,7 +7,7 @@ export const getAllJobs = createAsyncThunk(
   'job/getAllJobs',
   async (keyword = "", { rejectWithValue }) => {
     try {
-      const res = await axios.post(`${JOB_API_END_POINT}/all-jobs?keyword=${keyword}`, {
+      const res = await axios.get(`${JOB_API_END_POINT}/all-jobs?keyword=${keyword}`, {
         withCredentials: true,
       });
       return res.data.jobs;
@@ -22,7 +22,7 @@ export const getAdminJobs = createAsyncThunk(
   'job/getAdminJobs',
   async (_, { rejectWithValue }) => {
     try {
-      const res = await axios.post(`${JOB_API_END_POINT}/getadminjobs`, {
+      const res = await axios.get(`${JOB_API_END_POINT}/getadminjobs`, {
         withCredentials: true,
       });
       return res.data.jobs;
