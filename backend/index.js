@@ -23,6 +23,8 @@ app.use(cookieParser());
 /* ------------------------------   CORS   ------------------------------ */
 const FRONTEND_WHITELIST = [
   "https://jobverse-arpit.vercel.app",    // production frontend
+   "http://localhost:5173",
+   "http://localhost:3000", 
 ];
 
 const corsOptions = {

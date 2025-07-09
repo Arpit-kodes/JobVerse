@@ -11,7 +11,7 @@ const useGetAllJobs = () => {
   const fetchAllJobs = async (customKeyword = null) => {
     try {
       const keyword = customKeyword !== null ? customKeyword : searchedQuery || '';
-      const res = await axios.get(
+      const res = await axios.post(
         `${JOB_API_END_POINT}/all-jobs?keyword=${encodeURIComponent(keyword)}`,
         { withCredentials: true }
       );
