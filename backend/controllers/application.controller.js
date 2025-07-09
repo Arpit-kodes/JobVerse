@@ -72,7 +72,7 @@ export const getAppliedJobs = async (req, res) => {
   }
 };
 
-// ✅ Get all applicants for a job (admin) — FIXED!
+// ✅ Get all applicants for a job (admin)
 export const getApplicants = async (req, res) => {
   try {
     const jobId = req.params.id;
@@ -90,9 +90,8 @@ export const getApplicants = async (req, res) => {
       });
     }
 
-    // ✅ Send only applications instead of full job object
     return res.status(200).json({
-      applications: job.applications,
+      job,
       success: true,
     });
   } catch (error) {
@@ -122,7 +121,7 @@ export const updateStatus = async (req, res) => {
       });
     }
 
-    application.status = status;
+    application.status = status.toLowerCase();
     await application.save();
 
     return res.status(200).json({
