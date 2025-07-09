@@ -72,7 +72,7 @@ export const getAppliedJobs = async (req, res) => {
   }
 };
 
-// ✅ Get all applicants for a job (admin)
+// ✅ Get all applicants for a job (admin) — FIXED!
 export const getApplicants = async (req, res) => {
   try {
     const jobId = req.params.id;
@@ -90,8 +90,9 @@ export const getApplicants = async (req, res) => {
       });
     }
 
+    // ✅ Send only applications instead of full job object
     return res.status(200).json({
-      job,
+      applications: job.applications,
       success: true,
     });
   } catch (error) {
@@ -121,7 +122,7 @@ export const updateStatus = async (req, res) => {
       });
     }
 
-    application.status = status; // ✅ FIXED: Title Case is preserved
+    application.status = status;
     await application.save();
 
     return res.status(200).json({
