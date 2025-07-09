@@ -51,7 +51,7 @@ const JobDescription = () => {
   useEffect(() => {
     const fetchSingleJob = async () => {
       try {
-        const res = await axios.post(`${JOB_API_END_POINT}/get/${jobId}`, {
+        const res = await axios.get(`${JOB_API_END_POINT}/get/${jobId}`, {
           withCredentials: true,
         });
 
@@ -61,6 +61,7 @@ const JobDescription = () => {
         }
       } catch (error) {
         console.error('Error fetching job:', error);
+        toast.error('Failed to fetch job details');
       } finally {
         setTimeout(() => setLoading(false), 300);
       }

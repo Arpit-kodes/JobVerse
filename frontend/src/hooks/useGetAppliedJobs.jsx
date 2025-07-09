@@ -12,7 +12,7 @@ const useGetAppliedJobs = () => {
   useEffect(() => {
     const fetchAppliedJobs = async () => {
       try {
-        const res = await axios.post(`${APPLICATION_API_END_POINT}/get`, {
+        const res = await axios.get(`${APPLICATION_API_END_POINT}/get`, {
           withCredentials: true,
         });
 
