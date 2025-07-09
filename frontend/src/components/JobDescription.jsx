@@ -13,23 +13,25 @@ const JobDescription = () => {
   const { user } = useSelector(store => store.auth);
   const [isApplied, setIsApplied] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [applying, setApplying] = useState(false);
 
   const { id: jobId } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // Redirect immediately if user is not logged in
   useEffect(() => {
-    if (!user) {
-      navigate('/login');
-    }
+    if (!user) navigate('/login');
   }, [user, navigate]);
 
   const applyJobHandler = async () => {
+    if (!jobId) return toast.error("Invalid job ID");
+
     try {
-      const res = await axios.get(`${APPLICATION_API_END_POINT}/apply/${jobId}`, {
+      setApplying(true);
+      const res = await axios.post(`${APPLICATION_API_END_POINT}/apply/${jobId}`, {}, {
         withCredentials: true,
       });
+
       if (res.data.success) {
         setIsApplied(true);
         const updatedSingleJob = {
@@ -41,6 +43,8 @@ const JobDescription = () => {
       }
     } catch (error) {
       toast.error(error?.response?.data?.message || 'Something went wrong');
+    } finally {
+      setApplying(false);
     }
   };
 
@@ -50,6 +54,7 @@ const JobDescription = () => {
         const res = await axios.get(`${JOB_API_END_POINT}/get/${jobId}`, {
           withCredentials: true,
         });
+
         if (res.data.success) {
           dispatch(setSingleJob(res.data.job));
           setIsApplied(res.data.job.applications.some(app => app.applicant === user?._id));
@@ -57,7 +62,7 @@ const JobDescription = () => {
       } catch (error) {
         console.error('Error fetching job:', error);
       } finally {
-        setTimeout(() => setLoading(false), 300); // Smooth transition
+        setTimeout(() => setLoading(false), 300);
       }
     };
 
@@ -81,7 +86,6 @@ const JobDescription = () => {
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-black via-zinc-900 to-zinc-800 py-10 px-6 md:px-12 text-white">
-      {/* Back Button */}
       <button
         onClick={() => navigate(-1)}
         className="mb-6 flex items-center gap-2 text-sm text-gray-400 hover:text-white transition"
@@ -90,7 +94,6 @@ const JobDescription = () => {
       </button>
 
       <div className="bg-zinc-950 border border-zinc-700 rounded-2xl shadow-lg p-8 max-w-6xl mx-auto w-full">
-        {/* Job Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
           <div>
             <h1 className="text-4xl font-bold mb-4 text-white">{singleJob?.title}</h1>
@@ -108,36 +111,30 @@ const JobDescription = () => {
           </div>
 
           <button
-            onClick={!isApplied ? applyJobHandler : undefined}
-            disabled={isApplied}
+            onClick={!isApplied && !applying ? applyJobHandler : undefined}
+            disabled={isApplied || applying}
             className={`px-6 py-2 text-sm font-semibold rounded-xl transition-all duration-200 shadow-md
               ${
-                isApplied
+                isApplied || applying
                   ? 'bg-zinc-700 cursor-not-allowed text-zinc-400'
                   : 'bg-gradient-to-r from-white to-zinc-400 hover:from-gray-200 hover:to-white text-black'
               }
             `}
           >
-            {isApplied ? 'Already Applied' : 'Apply Now'}
+            {isApplied ? 'Already Applied' : applying ? 'Applying...' : 'Apply Now'}
           </button>
         </div>
 
-        {/* Job Details */}
         <div className="space-y-5 text-gray-300 text-sm md:text-base leading-relaxed">
           <InfoRow label="Company" value={singleJob?.company?.name || 'Not specified'} />
           <InfoRow label="Location" value={singleJob?.location || 'Remote / Not specified'} />
           <InfoRow label="Experience" value={`${singleJob?.experienceLevel || 0} yrs`} />
           <InfoRow label="Salary" value={`₹ ${singleJob?.salary} LPA`} />
           <InfoRow label="Total Applicants" value={singleJob?.applications?.length || 0} />
-          <InfoRow
-            label="Posted Date"
-            value={singleJob?.createdAt?.split('T')[0] || 'N/A'}
-          />
+          <InfoRow label="Posted Date" value={singleJob?.createdAt?.split('T')[0] || 'N/A'} />
 
           <div className="pt-4">
-            <h3 className="font-semibold text-gray-400 mb-2 text-lg">
-              Job Description
-            </h3>
+            <h3 className="font-semibold text-gray-400 mb-2 text-lg">Job Description</h3>
             <p className="text-gray-200">{singleJob?.description}</p>
           </div>
         </div>
@@ -146,7 +143,6 @@ const JobDescription = () => {
   );
 };
 
-// Reusable Info Row
 const InfoRow = ({ label, value }) => (
   <p>
     <span className="font-semibold text-gray-400">{label}: </span>

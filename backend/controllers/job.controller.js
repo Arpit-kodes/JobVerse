@@ -1,6 +1,6 @@
 import { Job } from "../models/job.model.js";
 
-// ✅ Admin posts a job
+// ✅ Admin creates a new job
 export const postJob = async (req, res) => {
   try {
     const {
@@ -17,6 +17,7 @@ export const postJob = async (req, res) => {
 
     const userId = req.id;
 
+    // Validate required fields
     if (
       !title || !description || !requirements || !salary || !location ||
       !jobType || !experienceLevel || !position || !companyId
@@ -27,15 +28,13 @@ export const postJob = async (req, res) => {
       });
     }
 
-    const parsedSalary = Number(salary);
-
     const job = await Job.create({
       title,
       description,
       requirements: Array.isArray(requirements)
         ? requirements.map(r => r.trim())
         : requirements.split(',').map(r => r.trim()),
-      salary: parsedSalary,
+      salary: Number(salary),
       location,
       jobType,
       experienceLevel,
@@ -58,10 +57,11 @@ export const postJob = async (req, res) => {
   }
 };
 
-// ✅ Student: Get all jobs
+// ✅ Student: Get all jobs (searchable)
 export const getAllJobs = async (req, res) => {
   try {
     const keyword = req.query.keyword || "";
+
     const query = {
       $or: [
         { title: { $regex: keyword, $options: "i" } },
@@ -90,7 +90,13 @@ export const getJobById = async (req, res) => {
 
     const job = await Job.findById(jobId)
       .populate("company")
-      .populate("applications");
+      .populate({
+        path: "applications",
+        populate: {
+          path: "applicant",
+          select: "-password",
+        },
+      });
 
     if (!job) {
       return res.status(404).json({ message: "Job not found.", success: false });
@@ -119,7 +125,7 @@ export const getAdminJobs = async (req, res) => {
   }
 };
 
-// ✅ Admin: Update job
+// ✅ Admin: Update a job
 export const updateJob = async (req, res) => {
   try {
     const jobId = req.params.id;
@@ -131,7 +137,7 @@ export const updateJob = async (req, res) => {
     }
 
     if (job.created_by.toString() !== userId) {
-      return res.status(403).json({ message: "You are not authorized to update this job.", success: false });
+      return res.status(403).json({ message: "Unauthorized to update this job.", success: false });
     }
 
     const {
@@ -173,7 +179,7 @@ export const updateJob = async (req, res) => {
   }
 };
 
-// ✅ Admin: Delete job
+// ✅ Admin: Delete a job
 export const deleteJob = async (req, res) => {
   try {
     const jobId = req.params.id;
@@ -185,7 +191,7 @@ export const deleteJob = async (req, res) => {
     }
 
     if (job.created_by.toString() !== userId) {
-      return res.status(403).json({ message: "Unauthorized", success: false });
+      return res.status(403).json({ message: "Unauthorized to delete this job.", success: false });
     }
 
     await job.deleteOne();

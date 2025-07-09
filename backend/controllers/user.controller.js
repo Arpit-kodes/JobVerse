@@ -4,13 +4,10 @@ import jwt from "jsonwebtoken";
 import getDataUri from "../utils/datauri.js";
 import cloudinary from "../utils/cloudinary.js";
 
-// REGISTER
+// ✅ REGISTER
 export const register = async (req, res) => {
   try {
     const { fullname, email, phoneNumber, password, role } = req.body;
-
-    console.log("Body:", req.body);
-    console.log("File:", req.file);
 
     if (!fullname || !email || !phoneNumber || !password || !role) {
       return res.status(400).json({
@@ -44,7 +41,7 @@ export const register = async (req, res) => {
       password: hashedPassword,
       role,
       profile: {
-        profilePhoto, // may be empty if not uploaded
+        profilePhoto,
       },
     });
 
@@ -62,7 +59,7 @@ export const register = async (req, res) => {
   }
 };
 
-// LOGIN
+// ✅ LOGIN (with correct cookie settings for deployment)
 export const login = async (req, res) => {
   try {
     const { email, password, role } = req.body;
@@ -115,7 +112,8 @@ export const login = async (req, res) => {
       .cookie("token", token, {
         maxAge: 24 * 60 * 60 * 1000,
         httpOnly: true,
-        sameSite: "strict",
+        secure: true,         // ✅ Required for HTTPS and cross-origin
+        sameSite: "None",     // ✅ Allows frontend on different origin to access
       })
       .json({
         message: `Welcome back ${user.fullname}`,
@@ -132,10 +130,15 @@ export const login = async (req, res) => {
   }
 };
 
-// LOGOUT
+// ✅ LOGOUT
 export const logout = async (req, res) => {
   try {
-    return res.status(200).cookie("token", "", { maxAge: 0 }).json({
+    return res.status(200).cookie("token", "", {
+      maxAge: 0,
+      httpOnly: true,
+      secure: true,     // ✅ Important
+      sameSite: "None", // ✅ Important
+    }).json({
       message: "Logged out successfully.",
       success: true,
     });
@@ -148,7 +151,7 @@ export const logout = async (req, res) => {
   }
 };
 
-// UPDATE PROFILE
+// ✅ UPDATE PROFILE
 export const updateProfile = async (req, res) => {
   try {
     const { fullname, email, phoneNumber, bio, skills } = req.body;
