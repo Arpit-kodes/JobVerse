@@ -121,7 +121,7 @@ export const updateStatus = async (req, res) => {
       });
     }
 
-    application.status = status.toLowerCase();
+    application.status = status; // ✅ FIXED: Title Case is preserved
     await application.save();
 
     return res.status(200).json({
