@@ -30,16 +30,27 @@ const ApplicantsTable = () => {
     setLocalApplicants(applicants?.applications || []);
   }, [applicants]);
 
+  const fetchUpdatedApplicants = async () => {
+    try {
+      // Assuming `applicants.jobId` exists and is set correctly in the Redux store
+      const jobId = applicants?.jobId;
+      if (!jobId) return;
+      const res = await axios.get(`${APPLICATION_API_END_POINT}/job/${jobId}/applicants`, {
+        withCredentials: true,
+      });
+      setLocalApplicants(res.data?.applications || []);
+    } catch (error) {
+      toast.error("Failed to fetch updated applicants");
+    }
+  };
+
   const statusHandler = async (status, id) => {
     try {
       axios.defaults.withCredentials = true;
       const res = await axios.post(`${APPLICATION_API_END_POINT}/status/${id}/update`, { status });
       if (res.data.success) {
         toast.success(res.data.message);
-        const updated = localApplicants.map((item) =>
-          item._id === id ? { ...item, status } : item
-        );
-        setLocalApplicants(updated);
+        await fetchUpdatedApplicants(); // 🔁 Refresh list after update
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Something went wrong.");
