@@ -167,7 +167,7 @@ const PostJob = () => {
                     }
                   />
                 </SelectTrigger>
-                <SelectContent className="bg-zinc-900 border border-zinc-700">
+                <SelectContent className="text-white bg-zinc-800 border border-zinc-700">
                   <SelectGroup>
                     <SelectItem value="Fresher">Fresher (0-1 yrs)</SelectItem>
                     <SelectItem value="Mid">Mid (1-2 yrs)</SelectItem>
@@ -200,7 +200,7 @@ const PostJob = () => {
                   <SelectTrigger className="w-full bg-zinc-800 border border-zinc-700 text-white">
                     <SelectValue placeholder="Choose a company..." />
                   </SelectTrigger>
-                  <SelectContent className="bg-zinc-900 border border-zinc-700">
+                  <SelectContent className="text-white bg-zinc-800 border border-zinc-700">
                     <SelectGroup>
                       {companies.map((company) => (
                         <SelectItem

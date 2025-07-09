@@ -1,7 +1,11 @@
 import React, { useState } from "react";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "../ui/popover";
 import { Button } from "../ui/button";
-import { Avatar, AvatarImage } from "../ui/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 import { LogOut, User2, Menu } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -43,6 +47,10 @@ const Navbar = () => {
           { label: "Jobs", path: "/jobs" },
           { label: "Browse", path: "/browse" },
         ];
+
+  const defaultAvatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    user?.fullname || "U"
+  )}&background=333&color=fff`;
 
   return (
     <header className="bg-[#111111] shadow-sm backdrop-blur-lg sticky top-0 z-50">
@@ -97,18 +105,28 @@ const Navbar = () => {
           <Popover>
             <PopoverTrigger asChild>
               <Avatar className="cursor-pointer hover:opacity-90 transition">
-                <AvatarImage src={user?.profile?.profilePhoto} alt="User" />
+                <AvatarImage
+                  src={user?.profile?.profilePhoto || defaultAvatarUrl}
+                  alt="User"
+                />
+                <AvatarFallback>{user?.fullname?.charAt(0) || "U"}</AvatarFallback>
               </Avatar>
             </PopoverTrigger>
             <PopoverContent className="w-80 bg-[#1a1a1a] text-gray-300 shadow-lg rounded-lg border border-[#2c2c2c]">
               <div className="p-3">
                 <div className="flex gap-3 items-center mb-3">
                   <Avatar>
-                    <AvatarImage src={user?.profile?.profilePhoto} alt="User" />
+                    <AvatarImage
+                      src={user?.profile?.profilePhoto || defaultAvatarUrl}
+                      alt="User"
+                    />
+                    <AvatarFallback>{user?.fullname?.charAt(0) || "U"}</AvatarFallback>
                   </Avatar>
                   <div>
                     <h4 className="font-semibold text-base">{user?.fullname}</h4>
-                    <p className="text-sm text-gray-500">{user?.profile?.bio}</p>
+                    <p className="text-sm text-gray-500">
+                      {user?.profile?.bio || "No bio"}
+                    </p>
                   </div>
                 </div>
                 <div className="flex flex-col gap-2 text-sm">

@@ -6,15 +6,17 @@ import { setSearchedQuery } from '@/redux/jobSlice';
 import useGetAllJobs from '@/hooks/useGetAllJobs';
 
 const Browse = () => {
-  useGetAllJobs();
-  const { allJobs } = useSelector(store => store.job);
   const dispatch = useDispatch();
+  const { searchedQuery, allJobs } = useSelector(store => store.job);
+  const { fetchAllJobs } = useGetAllJobs();
 
   useEffect(() => {
+    fetchAllJobs(searchedQuery); // ✅ fetch with keyword (empty string = all jobs)
+
     return () => {
       dispatch(setSearchedQuery(""));
     };
-  }, []);
+  }, [searchedQuery, dispatch]);
 
   return (
     <div className="bg-black min-h-screen text-white">

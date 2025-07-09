@@ -5,7 +5,7 @@ import Job from './Job';
 import { useSelector, useDispatch } from 'react-redux';
 import { getAllJobs } from '@/redux/jobSlice';
 import { motion } from 'framer-motion';
- 
+
 const Jobs = () => {
   const dispatch = useDispatch();
   const { allJobs, searchedQuery, loading } = useSelector(store => store.job);
@@ -16,16 +16,19 @@ const Jobs = () => {
   }, [dispatch]);
 
   useEffect(() => {
+    if (!searchedQuery || searchedQuery === '') {
+      setFilterJobs(allJobs); // ✅ fallback to all if no query
+      return;
+    }
+
     let jobs = [...allJobs];
     jobs.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // newest first
 
-    // --- Salary Range Filtering ---
     if (searchedQuery?.salaryRange) {
       const { min, max } = searchedQuery.salaryRange;
       jobs = jobs.filter(job => job.salary >= min && job.salary <= max);
     }
 
-    // --- Role Filtering ---
     if (searchedQuery?.role) {
       const roleQuery = searchedQuery.role.toLowerCase();
       jobs = jobs.filter(job =>
@@ -33,7 +36,6 @@ const Jobs = () => {
       );
     }
 
-    // --- Location Filtering ---
     if (searchedQuery?.location) {
       const locationQuery = searchedQuery.location.toLowerCase();
       jobs = jobs.filter(job =>
@@ -41,7 +43,6 @@ const Jobs = () => {
       );
     }
 
-    // --- Keyword Filtering (fallback if passed as string or keyword key) ---
     const keyword = typeof searchedQuery === 'string'
       ? searchedQuery
       : searchedQuery?.keyword || '';

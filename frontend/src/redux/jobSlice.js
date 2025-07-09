@@ -1,66 +1,84 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import axios from 'axios'
-import { USER_API_END_POINT } from '@/utils/constant'
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import axios from 'axios';
+import { JOB_API_END_POINT } from '@/utils/constant';
 
-// 🔁 Async Thunk: Fetch all jobs from backend
-export const getAllJobs = createAsyncThunk('job/getAllJobs', async (_, { rejectWithValue }) => {
-  try {
-    const res = await axios.get(`${USER_API_END_POINT}/job/all-jobs`, {
-      withCredentials: true,
-    });
-    return res.data.jobs; // assuming API returns { jobs: [...] }
-  } catch (err) {
-    return rejectWithValue(err.response?.data?.message || "Failed to fetch jobs");
+// ✅ Fetch all jobs with optional keyword
+export const getAllJobs = createAsyncThunk(
+  'job/getAllJobs',
+  async (keyword = "", { rejectWithValue }) => {
+    try {
+      const res = await axios.get(`${JOB_API_END_POINT}/all-jobs?keyword=${keyword}`, {
+        withCredentials: true,
+      });
+      return res.data.jobs;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || 'Failed to fetch jobs');
+    }
   }
-});
+);
 
+// ✅ Fetch admin's jobs
+export const getAdminJobs = createAsyncThunk(
+  'job/getAdminJobs',
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await axios.get(`${JOB_API_END_POINT}/getadminjobs`, {
+        withCredentials: true,
+      });
+      return res.data.jobs;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || 'Failed to fetch admin jobs');
+    }
+  }
+);
+
+// ✅ Delete job by ID
+export const deleteJobById = createAsyncThunk(
+  'job/deleteJobById',
+  async (jobId, { rejectWithValue }) => {
+    try {
+      await axios.delete(`${JOB_API_END_POINT}/delete/${jobId}`, {
+        withCredentials: true,
+      });
+      return jobId;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || 'Failed to delete job');
+    }
+  }
+);
+
+// ✅ Job Slice
 const jobSlice = createSlice({
   name: 'job',
   initialState: {
     allJobs: [],
     allAdminJobs: [],
-    singleJob: null,
-    searchJobByText: '',
     allAppliedJobs: [],
-    searchedQuery: '',
+    singleJob: null,
+    searchedQuery: "",
     loading: false,
     error: null,
   },
   reducers: {
-    setAllJobs: (state, action) => {
-      state.allJobs = action.payload;
-    },
     setSingleJob: (state, action) => {
       state.singleJob = action.payload;
     },
-    setAllAdminJobs: (state, action) => {
-      state.allAdminJobs = action.payload;
+    setSearchedQuery: (state, action) => {
+      state.searchedQuery = action.payload;
     },
     setSearchJobByText: (state, action) => {
-      state.searchJobByText = action.payload;
+      state.searchedQuery = action.payload;
+    },
+    setAllJobs: (state, action) => {
+      state.allJobs = action.payload;
     },
     setAllAppliedJobs: (state, action) => {
       state.allAppliedJobs = action.payload;
     },
-
-    // ✅ Enhanced filtering logic to support merging salary and keyword filters
-    setSearchedQuery: (state, action) => {
-      const payload = action.payload;
-
-      // If the payload is an object (like { salaryRange: {min, max} }), merge it
-      if (typeof payload === 'object' && payload !== null && !Array.isArray(payload)) {
-        if (typeof state.searchedQuery === 'object') {
-          state.searchedQuery = { ...state.searchedQuery, ...payload };
-        } else {
-          state.searchedQuery = { ...payload };
-        }
-      } else {
-        // If it's a string (from Hero input or Category click), store separately
-        state.searchedQuery = payload;
-      }
+    setAllAdminJobs: (state, action) => {
+      state.allAdminJobs = action.payload;
     },
   },
-
   extraReducers: (builder) => {
     builder
       .addCase(getAllJobs.pending, (state) => {
@@ -74,17 +92,45 @@ const jobSlice = createSlice({
       .addCase(getAllJobs.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+
+      .addCase(getAdminJobs.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getAdminJobs.fulfilled, (state, action) => {
+        state.loading = false;
+        state.allAdminJobs = action.payload;
+      })
+      .addCase(getAdminJobs.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      .addCase(deleteJobById.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteJobById.fulfilled, (state, action) => {
+        const jobId = action.payload;
+        state.loading = false;
+        state.allAdminJobs = state.allAdminJobs.filter((job) => job._id !== jobId);
+        state.allJobs = state.allJobs.filter((job) => job._id !== jobId);
+      })
+      .addCase(deleteJobById.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
-  }
+  },
 });
 
 export const {
-  setAllJobs,
   setSingleJob,
-  setAllAdminJobs,
+  setSearchedQuery,
   setSearchJobByText,
+  setAllJobs,
   setAllAppliedJobs,
-  setSearchedQuery
+  setAllAdminJobs,
 } = jobSlice.actions;
 
 export default jobSlice.reducer;

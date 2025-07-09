@@ -5,24 +5,28 @@ import {
   getAllJobs,
   getJobById,
   postJob,
-  updateJob, // ✅ Include update controller
+  updateJob,
+  deleteJob
 } from "../controllers/job.controller.js";
 
 const router = express.Router();
 
-// Create a job
-router.route("/post").post(isAuthenticated, postJob);
+// ✅ Create a job
+router.post("/post", isAuthenticated, postJob);
 
-// Get all jobs for all users
-router.route("/get").get(isAuthenticated, getAllJobs);
+// ✅ Get all jobs for users
+router.get("/all-jobs",  getAllJobs); // 🔁 must match frontend
 
-// Get jobs posted by the logged-in recruiter/admin
-router.route("/getadminjobs").get(isAuthenticated, getAdminJobs);
+// ✅ Get all jobs posted by logged-in admin
+router.get("/getadminjobs", isAuthenticated, getAdminJobs);
 
-// Get single job by ID
-router.route("/get/:id").get(isAuthenticated, getJobById);
+// ✅ Get single job
+router.get("/get/:id", isAuthenticated, getJobById);
 
-// ✅ Update job by ID (only by the job owner)
-router.route("/update/:id").put(isAuthenticated, updateJob);
+// ✅ Update job by ID
+router.put("/update/:id", isAuthenticated, updateJob);
+
+// ✅ Delete job by ID
+router.delete("/delete/:id", isAuthenticated, deleteJob);
 
 export default router;

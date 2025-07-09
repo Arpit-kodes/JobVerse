@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
-import Navbar from './shared/Navbar';
-import { Avatar, AvatarImage } from './ui/avatar';
-import { Button } from './ui/button';
-import { Contact, Mail, Pen } from 'lucide-react';
-import { Badge } from './ui/badge';
-import { Label } from './ui/label';
-import AppliedJobTable from './AppliedJobTable';
-import UpdateProfileDialog from './UpdateProfileDialog';
-import { useSelector } from 'react-redux';
-import useGetAppliedJobs from '@/hooks/useGetAppliedJobs';
+import React, { useState } from "react";
+import Navbar from "./shared/Navbar";
+import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar";
+import { Button } from "./ui/button";
+import { Contact, Mail, Pen } from "lucide-react";
+import { Badge } from "./ui/badge";
+import { Label } from "./ui/label";
+import AppliedJobTable from "./AppliedJobTable";
+import UpdateProfileDialog from "./UpdateProfileDialog";
+import { useSelector } from "react-redux";
+import useGetAppliedJobs from "@/hooks/useGetAppliedJobs";
 
 const Profile = () => {
   useGetAppliedJobs();
@@ -17,6 +17,10 @@ const Profile = () => {
 
   const skills = user?.profile?.skills || [];
   const hasResume = user?.profile?.resume && user?.profile?.resumeOriginalName;
+
+  const defaultAvatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    user?.fullname || "U"
+  )}&background=333&color=fff`;
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
@@ -29,21 +33,23 @@ const Profile = () => {
           <div className="flex items-center gap-5">
             <Avatar className="h-24 w-24 border border-zinc-700 shadow-md">
               <AvatarImage
-                src="https://www.shutterstock.com/image-vector/circle-line-simple-design-logo-600nw-2174926871.jpg"
+                src={user?.profile?.profilePhoto || defaultAvatarUrl}
                 alt="profile"
               />
+              <AvatarFallback>{user?.fullname?.charAt(0) || "U"}</AvatarFallback>
             </Avatar>
             <div>
-              <h1 className="text-2xl font-semibold">{user?.fullname || 'Full Name'}</h1>
-              <p className="text-gray-400 text-sm">{user?.profile?.bio || 'No bio provided.'}</p>
+              <h1 className="text-2xl font-semibold">{user?.fullname || "Full Name"}</h1>
+              <p className="text-gray-400 text-sm">
+                {user?.profile?.bio || "No bio provided."}
+              </p>
             </div>
           </div>
 
           {/* Edit Profile Button */}
           <Button
             onClick={() => setOpen(true)}
-            className="border border-zinc-500 text-white hover:bg-white hover:text-black"
-            variant="outline"
+            className="border border-gray-500 bg-white text-black hover:bg-gray-100"
           >
             <Pen className="w-4 h-4 mr-1" />
             Edit
@@ -54,11 +60,11 @@ const Profile = () => {
         <div className="mt-6 space-y-2 text-gray-300">
           <div className="flex items-center gap-3">
             <Mail className="w-4 h-4" />
-            <span>{user?.email || 'Not Provided'}</span>
+            <span>{user?.email || "Not Provided"}</span>
           </div>
           <div className="flex items-center gap-3">
             <Contact className="w-4 h-4" />
-            <span>{user?.phoneNumber || 'Not Provided'}</span>
+            <span>{user?.phoneNumber || "Not Provided"}</span>
           </div>
         </div>
 

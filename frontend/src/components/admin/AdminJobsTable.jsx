@@ -13,14 +13,17 @@ import {
   PopoverContent,
   PopoverTrigger
 } from '../ui/popover';
-import { Edit2, Eye, MoreHorizontal } from 'lucide-react';
-import { useSelector } from 'react-redux';
+import { Edit2, Eye, MoreHorizontal, Trash2 } from 'lucide-react';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { deleteJobById, getAllJobs, getAdminJobs } from '../../redux/jobSlice';
+import { toast } from 'sonner';
 
 const AdminJobsTable = () => {
-  const { allAdminJobs, searchJobByText } = useSelector((store) => store.job);
-  const [filterJobs, setFilterJobs] = useState(allAdminJobs);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { allAdminJobs, searchJobByText } = useSelector((store) => store.job);
+  const [filterJobs, setFilterJobs] = useState([]);
 
   useEffect(() => {
     const filtered = allAdminJobs.filter((job) => {
@@ -32,6 +35,23 @@ const AdminJobsTable = () => {
     });
     setFilterJobs(filtered);
   }, [allAdminJobs, searchJobByText]);
+
+  const handleDelete = async (id) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this job?");
+    if (!confirmDelete) return;
+
+    try {
+      await dispatch(deleteJobById(id)).unwrap();
+
+      // ✅ Sync public job list and admin jobs list
+      await dispatch(getAllJobs());
+      await dispatch(getAdminJobs());
+
+      toast.success("Job deleted and listings updated!");
+    } catch (err) {
+      toast.error("Failed to delete job.");
+    }
+  };
 
   return (
     <div className="overflow-x-auto mt-6 border border-zinc-800 rounded-xl shadow-lg bg-zinc-900">
@@ -50,10 +70,7 @@ const AdminJobsTable = () => {
         <TableBody>
           {filterJobs?.length > 0 ? (
             filterJobs.map((job) => (
-              <TableRow
-                key={job._id}
-                className="hover:bg-zinc-800 transition-colors"
-              >
+              <TableRow key={job._id} className="hover:bg-zinc-800 transition-colors">
                 <TableCell>{job?.company?.name}</TableCell>
                 <TableCell>{job?.title}</TableCell>
                 <TableCell>{job?.createdAt?.split('T')[0]}</TableCell>
@@ -63,7 +80,7 @@ const AdminJobsTable = () => {
                       <MoreHorizontal className="w-5 h-5 text-zinc-400" />
                     </PopoverTrigger>
                     <PopoverContent
-                      className="w-40 bg-zinc-800 border border-zinc-700 text-white p-2 rounded-lg"
+                      className="w-44 bg-zinc-800 border border-zinc-700 text-white p-2 rounded-lg"
                       sideOffset={5}
                     >
                       <div
@@ -79,6 +96,13 @@ const AdminJobsTable = () => {
                       >
                         <Eye className="w-4 text-zinc-300" />
                         <span>Applicants</span>
+                      </div>
+                      <div
+                        onClick={() => handleDelete(job._id)}
+                        className="flex items-center gap-2 px-2 py-1 mt-1 rounded hover:bg-red-700 cursor-pointer text-sm"
+                      >
+                        <Trash2 className="w-4 text-red-400" />
+                        <span className="text-red-400">Delete</span>
                       </div>
                     </PopoverContent>
                   </Popover>
