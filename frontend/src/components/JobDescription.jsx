@@ -57,7 +57,6 @@ const JobDescription = () => {
 
         if (res.data.success) {
           dispatch(setSingleJob(res.data.job));
-          setIsApplied(res.data.job.applications.some(app => app.applicant === user?._id));
         }
       } catch (error) {
         console.error('Error fetching job:', error);
@@ -69,6 +68,16 @@ const JobDescription = () => {
 
     if (user) fetchSingleJob();
   }, [jobId, dispatch, user]);
+
+  // ✅ Check if user has already applied once job & user are both loaded
+  useEffect(() => {
+    if (singleJob && user) {
+      const hasApplied = singleJob.applications?.some(app =>
+        app.applicant === user._id || app.applicant?._id === user._id
+      );
+      setIsApplied(hasApplied);
+    }
+  }, [singleJob, user]);
 
   if (loading) {
     return (
