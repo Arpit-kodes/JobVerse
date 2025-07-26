@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import Navbar from '../shared/Navbar';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
-import { RadioGroup } from '../ui/radio-group';
 import { Button } from '../ui/button';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -37,14 +36,11 @@ const Login = () => {
 
     try {
       dispatch(setLoading(true));
-
       const res = await axios.post(
         `${USER_API_END_POINT}/login`,
         input,
         {
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
           withCredentials: true,
         }
       );
@@ -88,7 +84,7 @@ const Login = () => {
               value={input.email}
               onChange={changeEventHandler}
               placeholder="arpit@gmail.com"
-              className="bg-zinc-800 border-zinc-700 text-white focus:ring-2 focus:ring-zinc-600"
+              className="bg-zinc-800 border-zinc-700 text-white"
             />
           </div>
 
@@ -100,36 +96,34 @@ const Login = () => {
               value={input.password}
               onChange={changeEventHandler}
               placeholder="********"
-              className="bg-zinc-800 border-zinc-700 text-white focus:ring-2 focus:ring-zinc-600"
+              className="bg-zinc-800 border-zinc-700 text-white"
             />
           </div>
 
           <div>
             <Label className="block mb-2">Role</Label>
-            <RadioGroup className="flex gap-6">
-              <label className="flex items-center gap-2 cursor-pointer">
+            <div className="flex gap-6">
+              <label className="flex items-center gap-2">
                 <input
                   type="radio"
                   name="role"
                   value="student"
                   checked={input.role === 'student'}
                   onChange={changeEventHandler}
-                  className="accent-zinc-400"
                 />
-                <span className="text-zinc-300">Student</span>
+                Student
               </label>
-              <label className="flex items-center gap-2 cursor-pointer">
+              <label className="flex items-center gap-2">
                 <input
                   type="radio"
                   name="role"
                   value="recruiter"
                   checked={input.role === 'recruiter'}
                   onChange={changeEventHandler}
-                  className="accent-zinc-400"
                 />
-                <span className="text-zinc-300">Recruiter</span>
+                Recruiter
               </label>
-            </RadioGroup>
+            </div>
           </div>
 
           {loading ? (
@@ -138,10 +132,7 @@ const Login = () => {
               Logging in...
             </Button>
           ) : (
-            <Button
-              type="submit"
-              className="w-full bg-zinc-800 hover:bg-zinc-700 text-white transition"
-            >
+            <Button type="submit" className="w-full bg-zinc-800 hover:bg-zinc-700 text-white">
               Login
             </Button>
           )}
