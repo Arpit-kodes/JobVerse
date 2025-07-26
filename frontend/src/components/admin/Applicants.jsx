@@ -18,7 +18,7 @@ const Applicants = () => {
         const res = await axios.get(`${APPLICATION_API_END_POINT}/${id}/applicants`, {
           withCredentials: true,
         });
-        dispatch(setAllApplicants(res.data.job));
+        dispatch(setAllApplicants(res.data.applicants));
       } catch (error) {
         console.error('Failed to fetch applicants:', error);
       }
