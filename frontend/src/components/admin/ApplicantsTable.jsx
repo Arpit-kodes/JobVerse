@@ -14,7 +14,8 @@ import axios from 'axios';
 
 const shortlistingStatus = ["Accepted", "Rejected"];
 
-const capitalize = (word) => word?.charAt(0).toUpperCase() + word?.slice(1).toLowerCase();
+const capitalize = (word) =>
+  word?.charAt(0).toUpperCase() + word?.slice(1).toLowerCase();
 
 const statusBadge = (status) => {
   const capitalStatus = capitalize(status);
@@ -26,22 +27,26 @@ const statusBadge = (status) => {
 };
 
 const ApplicantsTable = () => {
-  const { applicants } = useSelector(store => store.application);
+  const { applicants } = useSelector((store) => store.application);
   const [localApplicants, setLocalApplicants] = useState([]);
 
   useEffect(() => {
-    setLocalApplicants(applicants?.applications || []);
+    if (Array.isArray(applicants)) {
+      setLocalApplicants(applicants);
+    } else {
+      setLocalApplicants([]);
+    }
   }, [applicants]);
 
   const fetchUpdatedApplicants = async () => {
     try {
-      const jobId = applicants?.jobId;
+      const jobId = applicants?.[0]?.job?._id; // assuming all applicants are from the same job
       if (!jobId) return;
 
       const res = await axios.get(`${APPLICATION_API_END_POINT}/job/${jobId}/applicants`, {
         withCredentials: true,
       });
-      setLocalApplicants(res.data?.applications || []);
+      setLocalApplicants(res.data?.applicants || []);
     } catch (error) {
       toast.error("Failed to fetch updated applicants");
     }
@@ -63,7 +68,9 @@ const ApplicantsTable = () => {
   return (
     <div className="overflow-x-auto mt-6 shadow border border-zinc-800 rounded-md bg-zinc-900">
       <Table className="min-w-full text-sm text-white">
-        <TableCaption className="italic text-zinc-400 py-4">Applicants for this job</TableCaption>
+        <TableCaption className="italic text-zinc-400 py-4">
+          Applicants for this job
+        </TableCaption>
         <TableHeader className="bg-zinc-800 border-b border-zinc-700">
           <TableRow>
             <TableHead className="text-zinc-300 font-semibold">Full Name</TableHead>
@@ -79,10 +86,7 @@ const ApplicantsTable = () => {
         <TableBody>
           {localApplicants.length > 0 ? (
             localApplicants.map((item) => (
-              <TableRow
-                key={item._id}
-                className="hover:bg-zinc-800 transition-colors"
-              >
+              <TableRow key={item._id} className="hover:bg-zinc-800 transition-colors">
                 <TableCell>{item?.applicant?.fullname || "NA"}</TableCell>
                 <TableCell>{item?.applicant?.email || "NA"}</TableCell>
                 <TableCell>{item?.applicant?.phoneNumber || "NA"}</TableCell>
@@ -101,7 +105,9 @@ const ApplicantsTable = () => {
                   )}
                 </TableCell>
                 <TableCell>
-                  {item?.createdAt ? new Date(item.createdAt).toLocaleDateString() : "NA"}
+                  {item?.createdAt
+                    ? new Date(item.createdAt).toLocaleDateString()
+                    : "NA"}
                 </TableCell>
                 <TableCell>{statusBadge(item.status)}</TableCell>
                 <TableCell className="text-right">
