@@ -14,10 +14,13 @@ import axios from 'axios';
 
 const shortlistingStatus = ["Accepted", "Rejected"];
 
+const capitalize = (word) => word?.charAt(0).toUpperCase() + word?.slice(1).toLowerCase();
+
 const statusBadge = (status) => {
-  if (status === "Accepted")
+  const capitalStatus = capitalize(status);
+  if (capitalStatus === "Accepted")
     return <span className="bg-green-700/20 text-green-400 px-2 py-1 rounded text-xs font-medium">Accepted</span>;
-  if (status === "Rejected")
+  if (capitalStatus === "Rejected")
     return <span className="bg-red-700/20 text-red-400 px-2 py-1 rounded text-xs font-medium">Rejected</span>;
   return <span className="bg-yellow-700/20 text-yellow-300 px-2 py-1 rounded text-xs font-medium">Pending</span>;
 };
@@ -32,9 +35,9 @@ const ApplicantsTable = () => {
 
   const fetchUpdatedApplicants = async () => {
     try {
-      // Assuming `applicants.jobId` exists and is set correctly in the Redux store
       const jobId = applicants?.jobId;
       if (!jobId) return;
+
       const res = await axios.get(`${APPLICATION_API_END_POINT}/job/${jobId}/applicants`, {
         withCredentials: true,
       });
@@ -50,7 +53,7 @@ const ApplicantsTable = () => {
       const res = await axios.post(`${APPLICATION_API_END_POINT}/status/${id}/update`, { status });
       if (res.data.success) {
         toast.success(res.data.message);
-        await fetchUpdatedApplicants(); // 🔁 Refresh list after update
+        await fetchUpdatedApplicants();
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Something went wrong.");
@@ -80,25 +83,25 @@ const ApplicantsTable = () => {
                 key={item._id}
                 className="hover:bg-zinc-800 transition-colors"
               >
-                <TableCell>{item?.applicant?.fullname}</TableCell>
-                <TableCell>{item?.applicant?.email}</TableCell>
-                <TableCell>{item?.applicant?.phoneNumber}</TableCell>
+                <TableCell>{item?.applicant?.fullname || "NA"}</TableCell>
+                <TableCell>{item?.applicant?.email || "NA"}</TableCell>
+                <TableCell>{item?.applicant?.phoneNumber || "NA"}</TableCell>
                 <TableCell>
-                  {item.applicant?.profile?.resume ? (
+                  {item?.applicant?.profile?.resume ? (
                     <a
                       href={item.applicant.profile.resume}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-blue-400 underline hover:text-blue-300 transition"
                     >
-                      {item.applicant.profile.resumeOriginalName}
+                      {item.applicant.profile.resumeOriginalName || "View Resume"}
                     </a>
                   ) : (
                     <span className="text-zinc-500">NA</span>
                   )}
                 </TableCell>
                 <TableCell>
-                  {item?.applicant?.createdAt?.split("T")[0]}
+                  {item?.createdAt ? new Date(item.createdAt).toLocaleDateString() : "NA"}
                 </TableCell>
                 <TableCell>{statusBadge(item.status)}</TableCell>
                 <TableCell className="text-right">
@@ -108,11 +111,11 @@ const ApplicantsTable = () => {
                     </PopoverTrigger>
                     <PopoverContent className="w-36 p-2 bg-zinc-900 border border-zinc-700 text-white shadow-lg">
                       {shortlistingStatus.map((status, index) => {
-                        const isSelected = item.status === status;
+                        const isSelected = capitalize(item.status) === status;
                         return (
                           <div
                             key={index}
-                            onClick={() => statusHandler(status, item._id)}
+                            onClick={() => statusHandler(status.toLowerCase(), item._id)}
                             className={`px-2 py-1 rounded cursor-pointer text-sm
                               ${isSelected
                                 ? 'bg-green-700/20 text-green-400 font-medium'
