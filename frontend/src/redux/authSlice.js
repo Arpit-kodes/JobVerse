@@ -1,8 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { REHYDRATE } from "redux-persist";
 
 const initialState = {
   loading: false,
-  user: JSON.parse(localStorage.getItem("user")) || null,
+  user: null,
 };
 
 const authSlice = createSlice({
@@ -14,14 +15,21 @@ const authSlice = createSlice({
     },
     setUser: (state, action) => {
       state.user = action.payload;
-      localStorage.setItem("user", JSON.stringify(action.payload));
-      state.loading = false; //  Important to stop loading spinner
+      state.loading = false;
     },
     logout: (state) => {
       state.user = null;
       state.loading = false;
-      localStorage.removeItem("user");
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(REHYDRATE, (state, action) => {
+      return {
+        ...state,
+        ...action.payload?.auth,
+        loading: false, // prevent stuck spinner
+      };
+    });
   },
 });
 
