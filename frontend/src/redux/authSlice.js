@@ -15,7 +15,7 @@ const authSlice = createSlice({
     setUser: (state, action) => {
       state.user = action.payload;
       localStorage.setItem("user", JSON.stringify(action.payload));
-      state.loading = false; // ✅ Important to stop loading spinner
+      state.loading = false; //  Important to stop loading spinner
     },
     logout: (state) => {
       state.user = null;
