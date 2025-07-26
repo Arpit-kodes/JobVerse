@@ -14,7 +14,12 @@ export const applyJob = async (req, res) => {
       });
     }
 
-    const existingApplication = await Application.findOne({ job: jobId, applicant: userId });
+    // Check if already applied
+    const existingApplication = await Application.findOne({
+      job: jobId,
+      applicant: userId,
+    });
+
     if (existingApplication) {
       return res.status(409).json({
         message: "You have already applied for this job.",
@@ -22,6 +27,7 @@ export const applyJob = async (req, res) => {
       });
     }
 
+    // Check if job exists
     const job = await Job.findById(jobId);
     if (!job) {
       return res.status(404).json({
@@ -30,25 +36,31 @@ export const applyJob = async (req, res) => {
       });
     }
 
+    // Create application
     const newApplication = await Application.create({
       job: jobId,
       applicant: userId,
     });
 
+    // Add to job applications array
     job.applications.push(newApplication._id);
     await job.save();
 
     return res.status(201).json({
-      message: "Job applied successfully.",
+      message: "Applied to job successfully.",
       success: true,
+      application: newApplication,
     });
   } catch (error) {
     console.error("❌ Error in applyJob:", error);
-    return res.status(500).json({ message: "Internal server error", success: false });
+    return res.status(500).json({
+      message: "Internal server error.",
+      success: false,
+    });
   }
 };
 
-// ✅ Get all jobs the current user has applied to (candidate)
+// ✅ Get jobs the user applied to
 export const getAppliedJobs = async (req, res) => {
   try {
     const userId = req.id;
@@ -63,16 +75,19 @@ export const getAppliedJobs = async (req, res) => {
     const validApplications = applications.filter((app) => app.job !== null);
 
     return res.status(200).json({
-      application: validApplications,
+      applications: validApplications,
       success: true,
     });
   } catch (error) {
     console.error("❌ Error in getAppliedJobs:", error);
-    return res.status(500).json({ message: "Internal server error", success: false });
+    return res.status(500).json({
+      message: "Internal server error.",
+      success: false,
+    });
   }
 };
 
-// ✅ Get all applicants for a job (admin)
+// ✅ Get applicants for a job
 export const getApplicants = async (req, res) => {
   try {
     const jobId = req.params.id;
@@ -91,24 +106,29 @@ export const getApplicants = async (req, res) => {
     }
 
     return res.status(200).json({
-      job,
+      message: "Applicants fetched successfully.",
       success: true,
+      applicants: job.applications,
     });
   } catch (error) {
     console.error("❌ Error in getApplicants:", error);
-    return res.status(500).json({ message: "Internal server error", success: false });
+    return res.status(500).json({
+      message: "Internal server error.",
+      success: false,
+    });
   }
 };
 
-// ✅ Update application status (admin)
+// ✅ Update application status
 export const updateStatus = async (req, res) => {
   try {
-    const { status } = req.body;
     const applicationId = req.params.id;
+    const { status } = req.body;
 
-    if (!status) {
+    const validStatuses = ["pending", "accepted", "rejected"];
+    if (!status || !validStatuses.includes(status.toLowerCase())) {
       return res.status(400).json({
-        message: "Status is required.",
+        message: "Invalid or missing status. Must be one of: pending, accepted, rejected.",
         success: false,
       });
     }
@@ -121,15 +141,19 @@ export const updateStatus = async (req, res) => {
       });
     }
 
-    application.status = status; // ✅ FIXED: Title Case is preserved
+    application.status = status.toLowerCase();
     await application.save();
 
     return res.status(200).json({
       message: "Application status updated successfully.",
       success: true,
+      application,
     });
   } catch (error) {
     console.error("❌ Error in updateStatus:", error);
-    return res.status(500).json({ message: "Internal server error", success: false });
+    return res.status(500).json({
+      message: "Internal server error.",
+      success: false,
+    });
   }
 };
