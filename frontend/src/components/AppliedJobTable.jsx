@@ -48,7 +48,7 @@ const AppliedJobTable = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {allAppliedJobs.length === 0 ? (
+          {!allAppliedJobs || allAppliedJobs.length === 0 ? (
             <TableRow>
               <TableCell colSpan={4} className="text-center text-zinc-400 py-6">
                 You haven't applied to any jobs yet.
