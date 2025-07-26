@@ -36,7 +36,7 @@ const Applicants = () => {
             📄 Applicants
           </h1>
           <span className="text-zinc-400 text-sm sm:text-base">
-            Total: {applicants?.applications?.length || 0}
+            Total: {applicants?.length || 0}
           </span>
         </div>
 
