@@ -37,6 +37,7 @@ const Login = () => {
 
     try {
       dispatch(setLoading(true));
+
       const res = await axios.post(
         `${USER_API_END_POINT}/login`,
         input,
@@ -48,10 +49,12 @@ const Login = () => {
         }
       );
 
-      if (res.data.success) {
+      if (res.data?.success) {
         dispatch(setUser(res.data.user));
-        toast.success(res.data.message);
+        toast.success(res.data.message || 'Login successful!');
         navigate('/');
+      } else {
+        toast.error(res.data.message || 'Login failed.');
       }
     } catch (error) {
       console.error(error);
