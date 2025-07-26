@@ -27,7 +27,7 @@ const statusBadge = (status) => {
 };
 
 const ApplicantsTable = () => {
-  const { applicants } = useSelector((store) => store.application);
+  const applicants = useSelector((store) => store.application?.applicants || []);
   const [localApplicants, setLocalApplicants] = useState([]);
 
   useEffect(() => {
@@ -40,7 +40,7 @@ const ApplicantsTable = () => {
 
   const fetchUpdatedApplicants = async () => {
     try {
-      const jobId = applicants?.[0]?.job?._id; // assuming all applicants are from the same job
+      const jobId = applicants?.[0]?.job?._id;
       if (!jobId) return;
 
       const res = await axios.get(`${APPLICATION_API_END_POINT}/job/${jobId}/applicants`, {
@@ -84,7 +84,7 @@ const ApplicantsTable = () => {
         </TableHeader>
 
         <TableBody>
-          {localApplicants.length > 0 ? (
+          {Array.isArray(localApplicants) && localApplicants.length > 0 ? (
             localApplicants.map((item) => (
               <TableRow key={item._id} className="hover:bg-zinc-800 transition-colors">
                 <TableCell>{item?.applicant?.fullname || "NA"}</TableCell>
