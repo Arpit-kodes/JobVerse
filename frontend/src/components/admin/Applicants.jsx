@@ -10,7 +10,7 @@ import { setAllApplicants } from '@/redux/applicationSlice';
 const Applicants = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
-  const { applicants } = useSelector((store) => store.application);
+  const applicants = useSelector((store) => store.application?.applicants);
 
   useEffect(() => {
     const fetchAllApplicants = async () => {
@@ -18,13 +18,14 @@ const Applicants = () => {
         const res = await axios.get(`${APPLICATION_API_END_POINT}/${id}/applicants`, {
           withCredentials: true,
         });
-        dispatch(setAllApplicants(res.data.applicants));
+        dispatch(setAllApplicants(res.data?.applicants || [])); // default to empty array
       } catch (error) {
         console.error('Failed to fetch applicants:', error);
+        dispatch(setAllApplicants([])); // prevent undefined state
       }
     };
 
-    fetchAllApplicants();
+    if (id) fetchAllApplicants();
   }, [id, dispatch]);
 
   return (
@@ -36,13 +37,19 @@ const Applicants = () => {
             📄 Applicants
           </h1>
           <span className="text-zinc-400 text-sm sm:text-base">
-            Total: {applicants?.length || 0}
+            Total: {Array.isArray(applicants) ? applicants.length : 0}
           </span>
         </div>
 
         {/* Applicants Table */}
         <div className="bg-zinc-900 border border-zinc-700 rounded-md shadow-md overflow-hidden">
-          <ApplicantsTable />
+          {Array.isArray(applicants) && applicants.length > 0 ? (
+            <ApplicantsTable />
+          ) : (
+            <div className="p-6 text-center text-zinc-400">
+              No applicants found.
+            </div>
+          )}
         </div>
       </div>
     </div>
